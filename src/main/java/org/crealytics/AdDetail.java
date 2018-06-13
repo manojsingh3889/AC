@@ -9,11 +9,14 @@ public class AdDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String site;
     private Long requests;
     private Long impressions;
     private Long clicks;
     private Long conversions;
+
+    @CSVProperty("revenue (USD)")
     private Double revenue;
 
     public AdDetail() {
