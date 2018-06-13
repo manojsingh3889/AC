@@ -34,6 +34,7 @@ public class FrontController {
         service.insertAd(detail);
         HttpHeaders heeader = new HttpHeaders();
         heeader.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<String>(heeader,HttpStatus.OK);
+
+        return new ResponseEntity<String>("inserted",heeader,HttpStatus.OK);
     }
 }
