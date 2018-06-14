@@ -1,11 +1,9 @@
 package org.crealytics.utility;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.Field;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class contains utility method to convert a homogeneous csv file into java beans
+ * This class contains utility method to convert a homogeneous csv file into header and tuples
  * @author manoj
  */
 public class CSVReader {
@@ -24,135 +22,90 @@ public class CSVReader {
     private static final String SEPARATOR = "\\s*,\\s*";
     private static final String COMMA = ",";
     private static final String ENCODING = "UTF-8";
-    private List<String> files;
+    private Path path;
 
     /**
-     * Create CSVReader object with initial set of file paths
-     * @param filePaths vararg for csv paths
+     * Create CSVReader object with file paths
+     * @param path path string
      */
-    public CSVReader(List<String> filePaths){
-        this.files=filePaths;
+    public CSVReader(String path){
+        this.path = Paths.get(path);
     }
 
     /**
-     * no arg constructor, make sure you add file using {@link #addFile(String)} if you're using this constructor
+     * Create CSVReader object with file paths
+     * @param path path string
      */
-    public CSVReader() {
-        this.files = new ArrayList<>();
-    }
-
-    /**
-     * Add file more files to CSV reader
-     * @param filePath relative file path e.g. /src/main/resources/file.csv
-     * @return {@link CSVReader}
-     */
-    public CSVReader addFile(String filePath) {
-        this.files = files;
-        return this;
+    public CSVReader(Path path){
+        this.path = path;
     }
 
     /**
      * Convert csv file record into 2D-matrix of {@link String}
-     * @param filePath relative file path e.g. /src/main/resources/file.csv
+     * @param path path to file e.g. /src/main/resources/file.csv in {@link Path}
      * @return 2D-matrix of csv data using list
-     * @throws IOException asd
+     * @throws UncheckedIOException for IO ambiguity within lambda
      */
-    public static List<List<String>> getRecords(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
+    public static List<List<String>> getRecords(Path path){
         try(Reader reader = Files.newBufferedReader(path, Charset.forName(ENCODING));
             BufferedReader br = new BufferedReader(reader)){
             return br.lines()
                     .skip(1)
-                    .map(line -> Arrays.asList((line.concat(COMMA).concat(path.getFileName().toString())).split(SEPARATOR)))
+                    .map(line -> new ArrayList<String>(Arrays.asList(line.split(SEPARATOR))))
                     .collect(Collectors.toList());
         }catch (IOException e){
-            throw e;
+            throw new UncheckedIOException(e);
         }
     }
 
-    public List<List<String>> getRecords() throws Exception {
-        if(files.isEmpty())
-            throw new Exception("No file added");
-
-        List<List<String>> result = new ArrayList<>();
-
-        /*convert file records to bean list*/
-        for(String file: files)
-            result.addAll(getRecords(file));
-
-        return result;
+    /**
+     * Convert csv file record into 2D-matrix of {@link String}
+     * @param path path to file as {@link String} e.g. /src/main/resources/file.csv
+     * @return 2D-matrix of csv data using list
+     */
+    public static List<List<String>> getRecords(String path){
+        return getRecords(Paths.get(path));
     }
+
+    /**
+     * Convert pre loaded csv file into 2D-matrix of only records{@link String}
+     * @return 2D-matrix of csv data using list
+     */
+    public List<List<String>> getRecords(){
+        return getRecords(path);
+    }
+
     /**
      * Convert csv file header into List of {@link String}
-     * @param filePath relative file path e.g. /src/main/resources/file.csv
+     * @param path path to file e.g. /src/main/resources/file.csv in {@link Path}
      * @return list of headers
-     * @throws IOException asd
+     * @throws UncheckedIOException for IO ambiguity within lambda
      */
-    public static List<String> getHeaders(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
+    public static List<String> getHeaders(Path path){
         try(Reader reader = Files.newBufferedReader(path, Charset.forName(ENCODING));
             BufferedReader br = new BufferedReader(reader)){
             return br.lines().findFirst()
-                    .map(line -> Arrays.asList(line.concat(COMMA).concat("filename").split(SEPARATOR)))
+                    .map(line -> new ArrayList<String>(Arrays.asList(line.split(SEPARATOR))))
                     .get();
         }catch (IOException e){
-            throw e;
+            throw new UncheckedIOException(e);
         }
     }
 
-    public List<String> getHeaders() throws Exception {
-        if(files.isEmpty())
-            throw new Exception("No file added");
-        /*since file are assumed to be homogeneous, therefore header can be build once*/
-        return getHeaders(files.get(0));
+    /**
+     * Convert csv file header into List of {@link String}
+     * @param path path to file as {@link String} e.g. /src/main/resources/file.csv
+     * @return list of headers
+     */
+    public static List<String> getHeaders(String path){
+       return getHeaders(Paths.get(path));
     }
 
-    public static <T> List<T> getObjects(Class<T> t, List<String> headers, List<List<String>> records){
-        return records.parallelStream()
-                .map(record -> getObject(t, headers, record))
-                .collect(Collectors.toList());
-    }
-
-    public static <T> T getObject(Class<T> clazz, List<String> headers, List<String> record){
-        T obj = null;
-        try {
-
-            obj = clazz.newInstance();
-            T finalObj = obj;
-            Arrays.stream(Introspector.getBeanInfo(clazz).getPropertyDescriptors())
-                    .forEach(propertyDescriptor -> {
-                        try {
-                            //if field exist this statement will not exit with exception
-                            Field field = clazz.getDeclaredField(propertyDescriptor.getName());
-                            int index = headers.indexOf(propertyDescriptor.getName());
-
-                            if(index==-1 && field.getAnnotation(CSVProperty.class)!=null)
-                                index = headers.indexOf(field.getAnnotation(CSVProperty.class).value());
-
-
-                            if (index != -1)
-                                propertyDescriptor.getWriteMethod().invoke(finalObj,
-                                        GlobalUtils.parseValue(propertyDescriptor.getPropertyType(),record.get(index)));
-
-                        } catch (NoSuchFieldException e){
-                            //TODO write handler
-                        }catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-        } catch (InstantiationException|IllegalAccessException|IntrospectionException e) {
-            e.printStackTrace();
-        }
-        return obj;
-    }
-
-    public <T> List<T> convertTo(Class<T> clazz) throws Exception {
-        List<T> result = new ArrayList<>();
-
-        /*convert file records to bean list*/
-        for(String file: files)
-            result.addAll(getObjects(clazz,getHeaders(),getRecords(file)));
-
-        return result;
+    /**
+     * Convert pre loaded csv file header into List of {@link String}
+     * @return list of headers
+     */
+    public List<String> getHeaders(){
+        return getHeaders(path);
     }
 }

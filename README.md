@@ -71,9 +71,9 @@ They are largely extracted from [Appnexus wiki](https://wiki.appnexus.com/displa
 
   **Fill Rate = (impressions ÷ requests) × 100%**
 
-- **eCPM**: Effective Cost Per Thousand. A translation from CPM, expressed as such from a publisher's point of view.
+- **ecpm**: Effective Cost Per Thousand. A translation from CPM, expressed as such from a publisher's point of view.
 
-  **eCPM = (revenue × 1000) ÷ impressions**
+  **ecpm = (revenue × 1000) ÷ impressions**
 
 ## Task Description
 In the root folder you will find two csv files which contain publisher advertising reporting data for the months of
@@ -90,7 +90,7 @@ Your task is to
    * CTR
    * CR
    * Fill Rate
-   * eCPM
+   * ecpm
 
    How you store them is completely up to you.
 3. Design and expose a RESTful API that can read the reporting data which was parsed and generated in the previous step
@@ -116,7 +116,7 @@ Your task is to
    * CTR
    * CR
    * fill_rate
-   * eCPM
+   * ecpm
 7. Assume a 2-digit precision for all double values.
 8. The design of the API is completely up to you. For example, you can either use PathVariable or
    RequestParam or a combination of the two.
@@ -146,7 +146,7 @@ Your task is to
         "CTR" : "some_value",
         "CR" : "some_value",
         "fill_rate" : "some_value",
-        "eCPM" : "some_value"
+        "ecpm" : "some_value"
       }
       ```
 
@@ -164,7 +164,7 @@ Your task is to
         "CTR" : "some_value",
         "CR" : "some_value",
         "fill_rate" : "some_value",
-        "eCPM" : "some_value"
+        "ecpm" : "some_value"
       }
       ```
 
@@ -182,7 +182,7 @@ Your task is to
         "CTR" : "some_value",
         "CR" : "some_value",
         "fill_rate" : "some_value",
-        "eCPM" : "some_value"
+        "ecpm" : "some_value"
       }
   ```
   - GET http://localhost:8080/reports?site=android
@@ -198,7 +198,7 @@ Your task is to
         "CTR" : "some_value",
         "CR" : "some_value",
         "fill_rate" : "some_value",
-        "eCPM" : "some_value"
+        "ecpm" : "some_value"
       }
   ```
  The above examples are just for guidance, feel free to follow them but don't hesitate to come up with your own approach.

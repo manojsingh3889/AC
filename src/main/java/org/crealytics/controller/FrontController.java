@@ -1,6 +1,7 @@
 package org.crealytics.controller;
 
-import org.crealytics.bean.AdDetail;
+import org.crealytics.bean.AdDetailReport;
+import org.crealytics.exception.AppException;
 import org.crealytics.service.AdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +26,25 @@ public class FrontController {
     @Autowired
     AdService service;
 
-    @RequestMapping(value = "/reports", method = RequestMethod.GET)
-    public ResponseEntity<List<AdDetail>> reports(@RequestParam(value = "month") String month,
-                                          @RequestParam(value = "site", required = false) String site) {
+    @RequestMapping(value = "/report", method = RequestMethod.GET)
+    public ResponseEntity<AdDetailReport> reports(@RequestParam(value = "month") String month,
+                                          @RequestParam(value = "site", required = false) String site) throws AppException {
 
-
+        AdDetailReport detailReport = service.aggregatedReport(month, site);
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.APPLICATION_JSON);
-        AdDetail query = new AdDetail();
-        query.setMonth(1);
-//        query.setSite("iOS");
-        return new ResponseEntity<List<AdDetail>>(service.get(query), header,HttpStatus.OK);
+
+        return new ResponseEntity<>(detailReport, header, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/report/list", method = RequestMethod.GET)
+    public ResponseEntity<List<AdDetailReport>> reportsAsList(@RequestParam(value = "month") String month,
+                                                  @RequestParam(value = "site", required = false) String site) throws AppException {
+
+        List<AdDetailReport> reports = service.report(month, site);
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_JSON);
+
+        return new ResponseEntity<>(reports, header, HttpStatus.OK);
     }
 }

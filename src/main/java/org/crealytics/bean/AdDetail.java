@@ -18,25 +18,20 @@ public class AdDetail {
     private Long impressions;
     private Long clicks;
     private Long conversions;
+    @CSVProperty("revenue (USD)")
+    private Float revenue;
 
     private Float ctr;
     private Float cr;
     private Float fillRate;
-    private Float eCPM;
-    private int month;
-
-    @Transient
-    @CSVProperty("filename")
-    private String recordOf;
-
-    @CSVProperty("revenue (USD)")
-    private Double revenue;
+    private Float ecpm;
+    private Integer month;
 
     public AdDetail() {
     }
 
     public AdDetail(String site, Long requests, Long impressions,
-                    Long clicks, Long conversions, Double revenue) {
+                    Long clicks, Long conversions, Float revenue) {
         this.site = site;
         this.requests = requests;
         this.impressions = impressions;
@@ -93,11 +88,11 @@ public class AdDetail {
         this.conversions = conversions;
     }
 
-    public Double getRevenue() {
+    public Float getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(Double revenue) {
+    public void setRevenue(Float revenue) {
         this.revenue = revenue;
     }
 
@@ -125,25 +120,21 @@ public class AdDetail {
         this.fillRate = fillRate;
     }
 
-    public Float geteCPM() {
-        return eCPM;
+    public Float getEcpm() {
+        return ecpm;
     }
 
     public void seteCPM(Float eCPM) {
-        this.eCPM = eCPM;
+        this.ecpm = eCPM;
     }
 
 
-    public int getMonth() {
+    public Integer getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
+    public void setMonth(Integer month) {
         this.month = month;
-    }
-
-    public void setRecordOf(String recordOf) {
-        this.month = Integer.parseInt(recordOf.split("_")[1]);
     }
 
     @Override
@@ -171,7 +162,7 @@ public class AdDetail {
         ctr = Float.valueOf((float)clicks/impressions)*100;
         cr = ((float)conversions/impressions)*100;
         fillRate = ((float)impressions/requests)*100;
-        eCPM = (float)(revenue*1000)/impressions;
+        ecpm = (float)(revenue*1000)/impressions;
 
         return this;
     }
@@ -180,23 +171,5 @@ public class AdDetail {
     @PrePersist
     protected void onCreate() {
         fullBuild();
-        System.out.println(this);
-    }
-
-    @Override
-    public String toString() {
-        return "AdDetail{" +
-                "id=" + id +
-                ", site='" + site + '\'' +
-                ", requests=" + requests +
-                ", impressions=" + impressions +
-                ", clicks=" + clicks +
-                ", conversions=" + conversions +
-                ", ctr=" + ctr +
-                ", cr=" + cr +
-                ", fillRate=" + fillRate +
-                ", eCPM=" + eCPM +
-                ", revenue=" + revenue +
-                '}';
     }
 }

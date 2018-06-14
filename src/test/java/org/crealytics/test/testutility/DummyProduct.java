@@ -1,4 +1,4 @@
-package org.crealytics.test;
+package org.crealytics.test.testutility;
 
 
 import org.crealytics.utility.CSVProperty;
