@@ -1,6 +1,6 @@
 package org.crealytics.test.unit;
 
-import org.crealytics.AdDetailRepo;
+import org.crealytics.repository.AdRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class RepoTest{
 
     @Autowired
-    AdDetailRepo repo;
+    AdRepository repo;
 
 
     @Test

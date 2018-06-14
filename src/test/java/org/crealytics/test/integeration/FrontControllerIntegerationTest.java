@@ -1,7 +1,7 @@
 package org.crealytics.test.integeration;
 
-import org.crealytics.AdDetailRepo;
 import org.crealytics.BootStrap;
+import org.crealytics.repository.AdRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class FrontControllerIntegerationTest {
     private MockMvc mvc;
 
     @Autowired
-    private AdDetailRepo adDetailRepo;
+    private AdRepository adRepositoryImple;
 
 //    @Test
 //    public void givenEmployees_whenGetEmployees_thenStatus200()

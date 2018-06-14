@@ -1,14 +1,11 @@
 package org.crealytics.utility;
 
-import org.crealytics.CSVProperty;
-
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +22,7 @@ import java.util.stream.Collectors;
 public class CSVReader {
 
     private static final String SEPARATOR = "\\s*,\\s*";
+    private static final String COMMA = ",";
     private static final String ENCODING = "UTF-8";
     private List<String> files;
 
@@ -32,25 +30,15 @@ public class CSVReader {
      * Create CSVReader object with initial set of file paths
      * @param filePaths vararg for csv paths
      */
-    public CSVReader(String...filePaths){
-        this();
-        Arrays.stream(filePaths)
-                .forEach(file -> this.files.add(file));
+    public CSVReader(List<String> filePaths){
+        this.files=filePaths;
     }
 
     /**
      * no arg constructor, make sure you add file using {@link #addFile(String)} if you're using this constructor
      */
     public CSVReader() {
-        this(10);
-    }
-
-    /**
-     * low level constructor
-     * @param totalFiles number of files, mentioned or intented
-     */
-    private CSVReader(int totalFiles) {
-        this.files = new ArrayList<>(totalFiles);
+        this.files = new ArrayList<>();
     }
 
     /**
@@ -67,7 +55,7 @@ public class CSVReader {
      * Convert csv file record into 2D-matrix of {@link String}
      * @param filePath relative file path e.g. /src/main/resources/file.csv
      * @return 2D-matrix of csv data using list
-     * @throws IOException
+     * @throws IOException asd
      */
     public static List<List<String>> getRecords(String filePath) throws IOException {
         Path path = Paths.get(filePath);
@@ -75,7 +63,7 @@ public class CSVReader {
             BufferedReader br = new BufferedReader(reader)){
             return br.lines()
                     .skip(1)
-                    .map(line -> Arrays.asList(line.split(SEPARATOR)))
+                    .map(line -> Arrays.asList((line.concat(COMMA).concat(path.getFileName().toString())).split(SEPARATOR)))
                     .collect(Collectors.toList());
         }catch (IOException e){
             throw e;
@@ -98,14 +86,14 @@ public class CSVReader {
      * Convert csv file header into List of {@link String}
      * @param filePath relative file path e.g. /src/main/resources/file.csv
      * @return list of headers
-     * @throws IOException
+     * @throws IOException asd
      */
     public static List<String> getHeaders(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         try(Reader reader = Files.newBufferedReader(path, Charset.forName(ENCODING));
             BufferedReader br = new BufferedReader(reader)){
-            return br.lines().findFirst().
-                    map(line -> Arrays.asList(line.split(SEPARATOR)))
+            return br.lines().findFirst()
+                    .map(line -> Arrays.asList(line.concat(COMMA).concat("filename").split(SEPARATOR)))
                     .get();
         }catch (IOException e){
             throw e;
@@ -135,15 +123,20 @@ public class CSVReader {
                     .forEach(propertyDescriptor -> {
                         try {
                             //if field exist this statement will not exit with exception
-                            Field field = clazz.getDeclaredField(propertyDescriptor.getName();
-
+                            Field field = clazz.getDeclaredField(propertyDescriptor.getName());
                             int index = headers.indexOf(propertyDescriptor.getName());
-                            if(index==-1) {
-                                String csvproperty = field.getAnnotation(CSVProperty.class).value();
-                                index = headers.indexOf(csvproperty);
-                            }
-                            propertyDescriptor.getWriteMethod().invoke(finalObj, propertyDescriptor.getClass().cast(record.get(index)));
-                        } catch (IllegalAccessException|InvocationTargetException|NoSuchFieldException e) {
+
+                            if(index==-1 && field.getAnnotation(CSVProperty.class)!=null)
+                                index = headers.indexOf(field.getAnnotation(CSVProperty.class).value());
+
+
+                            if (index != -1)
+                                propertyDescriptor.getWriteMethod().invoke(finalObj,
+                                        GlobalUtils.parseValue(propertyDescriptor.getPropertyType(),record.get(index)));
+
+                        } catch (NoSuchFieldException e){
+                            //TODO write handler
+                        }catch (Exception e) {
                             e.printStackTrace();
                         }
                     });

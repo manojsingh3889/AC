@@ -1,4 +1,4 @@
-package org.crealytics;
+package org.crealytics.utility;
 
 import org.springframework.lang.NonNull;
 

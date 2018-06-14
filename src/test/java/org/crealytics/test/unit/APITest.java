@@ -1,14 +1,15 @@
 package org.crealytics.test.unit;
 
-import org.crealytics.AdDetail;
-import org.crealytics.AdDetailRepo;
-import org.crealytics.FrontController;
+import org.crealytics.bean.AdDetail;
+import org.crealytics.controller.FrontController;
+import org.crealytics.repository.AdRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,13 +19,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(FrontController.class)
+@ComponentScan("org.crealytics")
 public class APITest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    AdDetailRepo repo;
+    AdRepository repo;
 
     @Before
     public void setUp(){
