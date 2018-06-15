@@ -80,4 +80,8 @@ public class GlobalUtils {
     public static double precise(double value){
         return new BigDecimal(value).setScale(2,BigDecimal.ROUND_DOWN).doubleValue();
     }
+
+    public static <T> T safeValue(T t,T defaultVal){
+        return t != null? t:defaultVal;
+    }
 }
